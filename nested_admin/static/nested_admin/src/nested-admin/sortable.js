@@ -31,7 +31,7 @@ export function updatePositions(prefix) {
         $group.filterDjangoField(prefix, groupFkName).val(parentPkVal).trigger('change');
     }
 
-    $group.find('.djn-inline-form').each(function() {
+    $group.find('.djn-inline-form').each(function () {
         if (!this.id || this.id.substr(-6) == '-empty') {
             return true; // Same as continue
         }
@@ -63,7 +63,7 @@ export function updatePositions(prefix) {
         // position is being updated if
         // a) the field has a value
         // b) if the field is not exluded with sortable_excludes (e.g. with default values)
-        $fields.each(function() {
+        $fields.each(function () {
             var $field = $(this);
             if (!$field.is(':input[type!=radio][type!=checkbox],input:checked')) {
                 return;
@@ -105,7 +105,7 @@ export function createSortable($group) {
         items: '> .djn-item',
         forcePlaceholderSize: true,
         placeholder: {
-            element: function($currentItem) {
+            element: function ($currentItem) {
                 var el = $(document.createElement($currentItem[0].nodeName))
                     .addClass($currentItem[0].className + ' ui-sortable-placeholder')
                     .removeClass('ui-sortable-helper')[0];
@@ -118,7 +118,7 @@ export function createSortable($group) {
                     var $originalTd = $originalTr.children('.djn-td').eq(0);
                     var tdTagName = $originalTd.prop('tagName').toLowerCase();
                     var numColumns = 0;
-                    $originalTr.children('.djn-td').each(function(i, td) {
+                    $originalTr.children('.djn-td').each(function (i, td) {
                         numColumns += parseInt($(td).attr('colspan'), 10) || 1;
                     });
                     $tr.append($(`<${tdTagName} colspan="${numColumns}" class="djn-td grp-td"></${tdTagName}>`));
@@ -127,7 +127,7 @@ export function createSortable($group) {
 
                 return el;
             },
-            update: function(instance, $placeholder) {
+            update: function (instance, $placeholder) {
                 var $currItem = instance.currentItem;
                 var opts = instance.options;
                 // 1. If a className is set as 'placeholder option, we
@@ -164,7 +164,7 @@ export function createSortable($group) {
         connectWith: '.djn-items',
         tolerance: 'intersection',
         // Don't allow dragging beneath an inline that is marked for deletion
-        isAllowed: function(currentItem, parentItem) {
+        isAllowed: function (currentItem, parentItem) {
             if (parentItem && parentItem.hasClass('predelete')) {
                 return false;
             }
@@ -177,22 +177,38 @@ export function createSortable($group) {
         containerElementSelector: '.djn-items',
         // The selector for ALL list items in the nested sortable.
         listItemSelector: '.djn-item',
-        start: function(event, ui) {
+        start: function (event, ui) {
+            if (tinyMCE) {
+                ui.item.find('textarea').each(function () {
+                    var id = $(this).attr('id');
+                    if (id.indexOf('__prefix__') <= 0) {
+                        tinyMCE.execCommand('mceRemoveControl', true, id);
+                    }
+                });
+            }
             ui.item.addClass('djn-item-dragging');
             ui.item.show();
         },
-        stop: function(event, ui) {
+        stop: function (event, ui) {
             ui.item.removeClass('djn-item-dragging');
+            if (tinyMCE) {
+                ui.item.find('textarea').each(function () {
+                    var id = $(this).attr('id');
+                    if (id.indexOf('__prefix__') <= 0) {
+                        tinyMCE.execCommand('mceAddControl', true, id);
+                    }
+                });
+            }
         },
         /**
          * Triggered when a sortable is dropped into a container
          */
-        receive: function(event, ui) {
+        receive: function (event, ui) {
             var $inline = $(this).closest('.djn-group');
             $inline.djangoFormset().spliceInto(ui.item);
             updatePositions(ui.item.djangoFormsetPrefix());
         },
-        update: function(event, ui) {
+        update: function (event, ui) {
             // Ensure that <div class='djn-item djn-no-drag'/>
             // is the first child of the djn-items. If there
             // is another <div class='djn-item'/> before the

@@ -3096,11 +3096,27 @@ function createSortable($group) {
         // The selector for ALL list items in the nested sortable.
         listItemSelector: '.djn-item',
         start: function start(event, ui) {
+            if (tinyMCE) {
+                ui.item.find('textarea').each(function () {
+                    var id = (0, _jquery2.default)(this).attr('id');
+                    if (id.indexOf('__prefix__') <= 0) {
+                        tinyMCE.execCommand('mceRemoveControl', true, id);
+                    }
+                });
+            }
             ui.item.addClass('djn-item-dragging');
             ui.item.show();
         },
         stop: function stop(event, ui) {
             ui.item.removeClass('djn-item-dragging');
+            if (tinyMCE) {
+                ui.item.find('textarea').each(function () {
+                    var id = (0, _jquery2.default)(this).attr('id');
+                    if (id.indexOf('__prefix__') <= 0) {
+                        tinyMCE.execCommand('mceAddControl', true, id);
+                    }
+                });
+            }
         },
         /**
          * Triggered when a sortable is dropped into a container
