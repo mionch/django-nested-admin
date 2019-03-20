@@ -1,9 +1,9 @@
 'use strict';
 
-import $ from 'jquery';
-import regexQuote from './regexquote';
-import DJNesting from './utils';
-import grappelli from 'grappelli';
+const $ = require('jquery');
+const regexQuote = require('./regexquote');
+const DJNesting = require('./utils');
+const grappelli = require('grappelli');
 
 var pluginName = 'djangoFormset';
 
@@ -270,7 +270,8 @@ class DjangoFormset {
         DJNesting.initRelatedFields(this.prefix);
         DJNesting.initAutocompleteFields(this.prefix);
         if ($.fn.grp_collapsible) {
-            $form.find('.collapse').andSelf().grp_collapsible({
+            var addBackMethod = ($.fn.addBack) ? 'addBack' : 'andSelf';
+            $form.find('.collapse')[addBackMethod]().grp_collapsible({
                 toggle_handler_slctr: '.grp-collapse-handler:first',
                 closed_css: 'closed grp-closed',
                 open_css: 'open grp-open',
@@ -487,4 +488,4 @@ $.fn[pluginName] = function() {
     }
 };
 
-export default DjangoFormset;
+module.exports = DjangoFormset;

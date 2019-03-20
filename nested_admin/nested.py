@@ -3,21 +3,21 @@ import json
 from django.conf import settings
 from django.contrib.admin import helpers
 from django.contrib.contenttypes.admin import GenericInlineModelAdmin
-from django.contrib.staticfiles.storage import staticfiles_storage
 try:
     # Django 1.10
     from django.urls import reverse
 except ImportError:
     # Django <= 1.9
     from django.core.urlresolvers import reverse
-from django import forms
 from django.template.defaultfilters import capfirst
 from django.utils import six
+from django.utils.functional import lazy
 from django.utils.six.moves import zip
 from django.utils.translation import ugettext
-
-from .formsets import NestedInlineFormSet, NestedBaseGenericInlineFormSet
 from django.contrib.admin.options import ModelAdmin, InlineModelAdmin
+
+from .compat import MergeSafeMedia
+from .formsets import NestedInlineFormSet, NestedBaseGenericInlineFormSet
 
 
 __all__ = (
@@ -29,6 +29,10 @@ __all__ = (
 
 def get_method_function(fn):
     return fn.im_func if six.PY2 else fn
+
+
+lazy_reverse = lazy(reverse, str)
+server_data_js_url = lazy_reverse('nesting_server_data')
 
 
 class NestedInlineAdminFormset(helpers.InlineAdminFormSet):
@@ -63,23 +67,21 @@ class NestedInlineAdminFormset(helpers.InlineAdminFormSet):
             yield inline_admin_form
 
     def _media(self):
-        media = self.opts.media + self.formset.media
+        media = MergeSafeMedia(self.formset.media) + self.opts.media
         for fs in self:
             media = media + fs.media
             for inline in (getattr(fs.form, 'inlines', None) or []):
                 media = media + inline.media
 
         # Add nested-admin js and css here, to ensure it goes after any widgets
-        static_url = staticfiles_storage.url
-        server_data_js = reverse('nesting_server_data')
         min_ext = '' if getattr(settings, 'NESTED_ADMIN_DEBUG', False) else '.min'
-        return media + forms.Media(
+        return media + MergeSafeMedia(
             js=(
-                server_data_js,
-                static_url('nested_admin/dist/nested_admin%s.js' % min_ext),
+                server_data_js_url,
+                'nested_admin/dist/nested_admin%s.js' % min_ext,
             ),
             css={'all': (
-                static_url('nested_admin/dist/nested_admin%s.css' % min_ext),
+                'nested_admin/dist/nested_admin%s.css' % min_ext,
             )})
     media = property(_media)
 

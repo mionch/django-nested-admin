@@ -1,11 +1,11 @@
 'use strict';
 
-import $ from 'jquery';
-import './jquery.djnutils.js';
-import {createSortable, updatePositions} from './sortable';
-import regexQuote from './regexquote';
-import DateTimeShortcuts from 'django/date-time-shortcuts';
-import SelectFilter from 'django/select-filter';
+const $ = require('jquery');
+require('./jquery.djnutils.js');
+const {createSortable, updatePositions} = require('./sortable');
+const regexQuote = require('./regexquote');
+const DateTimeShortcuts = require('django/date-time-shortcuts');
+const SelectFilter = require('django/select-filter');
 
 var DJNesting = (typeof window.DJNesting != 'undefined')
                ? window.DJNesting : {};
@@ -24,7 +24,8 @@ DJNesting.updateFormAttributes = function($elem, search, replace, selector) {
             'img', '.djn-group', '.djn-inline-form', '.cropduster-form',
             '.dal-forward-conf'].join(',');
     }
-    $elem.find(selector).andSelf().each(function() {
+    var addBackMethod = ($.fn.addBack) ? 'addBack' : 'andSelf';
+    $elem.find(selector)[addBackMethod]().each(function() {
         var $node = $(this),
             attrs = ['id', 'name', 'for', 'href', 'class', 'onclick'];
 
@@ -208,6 +209,4 @@ DJNesting.DjangoInlines = {
     }
 };
 
-window.DJNesting = DJNesting;
-
-export default DJNesting;
+module.exports = DJNesting;

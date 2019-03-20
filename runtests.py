@@ -3,13 +3,14 @@ import os
 import re
 import warnings
 
-import django_admin_testutils
+import selenosis
 
 
 # A dict for mapping test case classes to their import paths, to allow passing
 # TestCaseClass.test_function as shorthand to runtests.py
 TEST_CASE_MODULE_PATHS = {
     'TestAdminWidgets': 'nested_admin.tests.admin_widgets.tests',
+    'TestWidgetMediaOrder': 'nested_admin.tests.admin_widgets.tests',
     'TestGenericInlineAdmin': 'nested_admin.tests.gfk.tests',
     'VisualComparisonTestCase': 'nested_admin.tests.one_deep.tests',
     'TestDeepNesting': 'nested_admin.tests.three_deep.tests',
@@ -33,7 +34,7 @@ def expand_test_module(module):
     return "%s.%s%s" % (TEST_CASE_MODULE_PATHS[cls], cls, test_fn)
 
 
-class RunTests(django_admin_testutils.RunTests):
+class RunTests(selenosis.RunTests):
 
     def execute(self, flags, test_labels):
         test_labels = [expand_test_module(m) for m in test_labels]
