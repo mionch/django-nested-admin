@@ -3665,7 +3665,7 @@ function createSortable($group) {
     // The selector for ALL list items in the nested sortable.
     listItemSelector: '.djn-item',
     start: function start(event, ui) {
-      if (tinyMCE) {
+      if (typeof tinyMCE !== 'undefined') {
         ui.item.find('textarea').each(function () {
           var id = $(this).attr('id');
 
@@ -3681,7 +3681,7 @@ function createSortable($group) {
     stop: function stop(event, ui) {
       ui.item.removeClass('djn-item-dragging');
 
-      if (tinyMCE) {
+      if (typeof tinyMCE !== 'undefined') {
         ui.item.find('textarea').each(function () {
           var id = $(this).attr('id');
 
